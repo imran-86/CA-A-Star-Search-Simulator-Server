@@ -7,15 +7,26 @@ require('dotenv').config();
 
 const app = express();
 const server = http.createServer(app);
+app.use(cors({
+  origin: [
+    'http://localhost:5173',
+    'https://pathfinding-simulator-jet.vercel.app/'  // ← Add your Vercel URL
+  ],
+  credentials: true
+}));
 const io = socketIO(server, {
   cors: {
-    origin: "http://localhost:5173",
-    methods: ["GET", "POST"]
+    origin: [
+      'http://localhost:5173',
+      'https://pathfinding-simulator-jet.vercel.app/'  // ← Add your Vercel URL
+    ],
+    methods: ["GET", "POST"],
+    credentials: true
   }
 });
 
 // Middleware
-app.use(cors());
+
 app.use(express.json());
 
 // Python service URL
