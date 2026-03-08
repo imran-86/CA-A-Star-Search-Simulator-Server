@@ -7,21 +7,48 @@ require('dotenv').config();
 
 const app = express();
 const server = http.createServer(app);
+
+// ✅ CORS Configuration - FIXED
+const allowedOrigins = [
+  'http://localhost:5173',
+  'https://pathfinding-simulator-jet.vercel.app',  // ← আপনার Vercel URL
+  'https://*.vercel.app'  // All Vercel preview URLs
+];
+
+// Express CORS
 app.use(cors({
-  origin: [
-    'http://localhost:5173',
-    'https://pathfinding-simulator-jet.vercel.app/'  // ← Add your Vercel URL
-  ],
-  credentials: true
+  origin: function(origin, callback) {
+    // Allow requests with no origin (like mobile apps or curl)
+    if (!origin) return callback(null, true);
+    
+    if (allowedOrigins.indexOf(origin) !== -1 || 
+        origin.endsWith('.vercel.app')) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  credentials: true,
+  methods: ['GET', 'POST', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
 }));
+
+// Socket.IO CORS
 const io = socketIO(server, {
   cors: {
-    origin: [
-      'http://localhost:5173',
-      'https://pathfinding-simulator-jet.vercel.app/'  // ← Add your Vercel URL
-    ],
+    origin: function(origin, callback) {
+      if (!origin) return callback(null, true);
+      
+      if (allowedOrigins.indexOf(origin) !== -1 || 
+          origin.endsWith('.vercel.app')) {
+        callback(null, true);
+      } else {
+        callback(new Error('Not allowed by CORS'));
+      }
+    },
+    credentials: true,
     methods: ["GET", "POST"],
-    credentials: true
+    allowedHeaders: ['Content-Type', 'Authorization']
   }
 });
 
